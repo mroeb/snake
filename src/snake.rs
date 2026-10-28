@@ -1,21 +1,48 @@
-use crate::{constants, helper, orientation::Orientation, pos::Pos};
+use std::collections::VecDeque;
+
+use macroquad::color::*;
+
+use crate::{
+    constants::S_COUNT,
+    helper::{draw_square, wrap},
+    orientation::Orientation,
+    pos::Pos,
+};
 
 #[derive(Debug)]
 pub struct Snake {
-    pub body: std::collections::VecDeque<super::pos::Pos>,
+    pub body: VecDeque<Pos>,
     pub dir: Orientation,
 }
 
 impl Snake {
+    pub fn new(begin: Pos, orientation: Orientation) -> Self {
+        let mut body = VecDeque::new();
+
+        body.push_back(Pos::new(begin.x, begin.y));
+        body.push_back(Pos::new(begin.x - 1, begin.y));
+        body.push_back(Pos::new(begin.x - 2, begin.y));
+
+        Self {
+            body,
+            dir: orientation,
+        }
+    }
+
     pub fn draw(&self) {
         for b in self.body.iter().enumerate() {
             let color = if b.0 == 0 {
-                macroquad::color::RED
+                RED
             } else {
-                macroquad::color::GREEN
+                Color {
+                    r: 0.0,
+                    g: 1.0 - (b.0 as f32 / 100.0),
+                    b: 0.19,
+                    a: 1.0,
+                }
             };
 
-            helper::draw_square(b.1.x, b.1.y, color);
+            draw_square(b.1.x, b.1.y, color);
         }
     }
 
@@ -23,10 +50,10 @@ impl Snake {
         let first = self.body.front().expect("Body can't be empty");
 
         let new_head = match self.dir {
-            Orientation::Up => Pos::new(first.x, helper::wrap(first.y - 1, constants::S_COUNT)),
-            Orientation::Down => Pos::new(first.x, helper::wrap(first.y + 1, constants::S_COUNT)),
-            Orientation::Left => Pos::new(helper::wrap(first.x - 1, constants::S_COUNT), first.y),
-            Orientation::Right => Pos::new(helper::wrap(first.x + 1, constants::S_COUNT), first.y),
+            Orientation::Up => Pos::new(first.x, wrap(first.y - 1, S_COUNT)),
+            Orientation::Down => Pos::new(first.x, wrap(first.y + 1, S_COUNT)),
+            Orientation::Left => Pos::new(wrap(first.x - 1, S_COUNT), first.y),
+            Orientation::Right => Pos::new(wrap(first.x + 1, S_COUNT), first.y),
         };
 
         self.body.push_front(new_head);

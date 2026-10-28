@@ -2,15 +2,14 @@ use std::collections::VecDeque;
 
 use anyhow::Result;
 use macroquad::{
-    color::{BLACK, Color, GREEN, RED, WHITE},
+    color::{BLACK, GREEN},
     input::{KeyCode, get_last_key_pressed},
-    shapes::{draw_line, draw_rectangle},
     time::get_frame_time,
     window::{Conf, clear_background, next_frame},
 };
 
 use crate::{
-    constants::{WINDOW_HEIGHT, WINDOW_WIDTH},
+    constants::{MOVEMENT_INTERVAL, WINDOW_HEIGHT, WINDOW_WIDTH},
     food::Food,
     helper::{draw_board, draw_square},
     orientation::Orientation,
@@ -38,23 +37,14 @@ fn config() -> Conf {
 
 #[macroquad::main(config)]
 async fn main() -> Result<()> {
-    let mut snake = Snake {
-        dir: Orientation::Right,
-        body: VecDeque::new(),
-    };
-    snake.body.push_back(Pos::new(3, 3));
-    snake.body.push_back(Pos::new(2, 3));
-    snake.body.push_back(Pos::new(1, 3));
-
-    let movement_interval = 0.15;
+    let mut snake = Snake::new(Pos::new(3, 3), Orientation::Right);
     let mut time_since_last_move = 0.0;
-
     let mut food = Food::spawn();
 
     loop {
         time_since_last_move += get_frame_time();
 
-        if time_since_last_move >= movement_interval {
+        if time_since_last_move >= MOVEMENT_INTERVAL {
             let has_eaten_food =
                 if snake.body.front().expect("Snake body should not be None") == &food.pos {
                     food = Food::spawn();

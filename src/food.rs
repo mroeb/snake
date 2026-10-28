@@ -1,16 +1,16 @@
-use crate::{constants, pos};
+use crate::{constants::S_COUNT, pos::Pos};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Food {
-    pub pos: super::pos::Pos,
+    pub pos: Pos,
 }
 
 impl Food {
     pub fn spawn() -> Self {
         Self {
-            pos: pos::Pos::new(
-                rand::random_range(0..constants::S_COUNT),
-                rand::random_range(0..constants::S_COUNT),
+            pos: Pos::new(
+                rand::random_range(0..S_COUNT),
+                rand::random_range(0..S_COUNT),
             ),
         }
     }
