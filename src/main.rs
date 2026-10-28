@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use anyhow::Result;
 use macroquad::{
     color::{BLACK, Color, GREEN, RED, WHITE},
@@ -23,6 +25,25 @@ fn config() -> Conf {
 struct Pos {
     x: i32,
     y: i32,
+}
+
+impl Pos {
+    fn new(x: i32, y: i32) -> Self {
+        Self { x, y }
+    }
+}
+
+#[derive(Debug)]
+struct Snake {
+    body: Vec<Pos>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum Orientation {
+    Up,
+    Down,
+    Left,
+    Right,
 }
 
 fn draw_board() {
@@ -51,15 +72,50 @@ fn draw_square(x: i32, y: i32, color: Color) {
     );
 }
 
+fn draw_snake(snake: &Snake) {
+    for b in snake.body.iter() {
+        let color = GREEN;
+
+        draw_square(b.x, b.y, color);
+    }
+}
+
+fn move_snake(snake: &mut Snake, direction: Orientation) {
+    let top = snake.body.pop().unwrap_or(Pos::new(0, 0));
+
+    match direction {
+        Orientation::Up => {
+            snake.body.push(Pos::new(top.x, top.y - 1));
+        }
+        Orientation::Down => {
+            snake.body.push(Pos::new(top.x, top.y + 1));
+        }
+        Orientation::Left => {
+            snake.body.push(Pos::new(top.x - 1, top.y));
+        }
+        Orientation::Right => {
+            snake.body.push(Pos::new(top.x + 1, top.y));
+        }
+    }
+}
+
 #[macroquad::main(config)]
 async fn main() -> Result<()> {
+    let mut snake = Snake { body: Vec::new() };
+    snake.body.push(Pos::new(3, 3));
+    snake.body.push(Pos::new(2, 3));
+    snake.body.push(Pos::new(1, 3));
+
+    move_snake(&mut snake, Orientation::Right);
+    move_snake(&mut snake, Orientation::Right);
+    move_snake(&mut snake, Orientation::Right);
+
     loop {
         clear_background(BLACK);
 
         draw_board();
 
-        draw_square(0, 0, GREEN);
-        draw_square(3, 3, RED);
+        draw_snake(&snake);
 
         next_frame().await
     }
